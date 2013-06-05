@@ -173,3 +173,11 @@ código.
 ![busqueda](http://img703.imageshack.us/img703/9692/selection010k.png "Basta de __FILE__")
 
 Bueno, por se puede escribir `__dir__` para eso...
+
+~~~ ruby
+$: << File.expand_path(File.join(__dir__, '..', 'lib'))
+~~~
+
+> Por si no se nota, hay un '..' menos, que siempre confunde mucho, ya
+> que el primero es para bajar desde `hackerup/test/helper.rb` a
+> `hackerup/test`
