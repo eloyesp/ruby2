@@ -170,6 +170,8 @@ código.
 
 ## Las otras pequeñas cosas ##
 
+## __dir__ ##
+
 ![busqueda](http://img703.imageshack.us/img703/9692/selection010k.png "Basta de __FILE__")
 
 Bueno, por se puede escribir `__dir__` para eso...
@@ -181,3 +183,27 @@ $: << File.expand_path(File.join(__dir__, '..', 'lib'))
 > Por si no se nota, hay un '..' menos, que siempre confunde mucho, ya
 > que el primero es para bajar desde `hackerup/test/helper.rb` a
 > `hackerup/test`
+
+### %i ###
+
+Completando el set de %q, %r... %i
+
+~~~ ruby
+%i[ uno dos tres ] #=> [:uno, :dos, :tres]
+~~~
+
+### to_h ###
+
+Para completar to_a, to_s, to_sym... faltaba alguien. No anda re-bien,
+pero está ahí y almenos plantea un standar.
+
+A mi me permitió conocer a los Struct, que después me cayeron re-bien.
+
+
+~~~ ruby
+Persona = Struct.new(:nombre)  #=> Persona
+carlos = Persona.new('carlos') #=> #<struct Persona nombre="carlos">
+carlos.to_h                    #=> {:nombre=>"carlos"}
+~~~
+
+
