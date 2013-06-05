@@ -91,4 +91,79 @@ before_filter :some_method, onli: [:create]
 Y no solo eso, ahora el método se entiende más y las opciones ahora casi
 no es necesario documentarlas.
 
+O sea, que es más:
 
+- Expresivo
+- Claro
+- Conciso
+- Autodocumentado
+
+## Module prepend ##
+
+Bueno, este es complicado de ver al principio, pero supongamos que
+queremos hacer un módulo para agregar validaciones a un modelo. Mmm...
+esperá, eso ya lo hace rails... como lo hace?
+
+~~~ ruby
+# File activemodel/lib/active_model/validations.rb, line 132
+
+def validate(*args, &block)
+  options = args.extract_options!
+  if options.key?(:on)
+    options = options.dup
+    options[:if] = Array.wrap(options[:if])
+    options[:if].unshift("validation_context == :#{options[:on]}")
+  end
+  args << options
+  set_callback(:validate, *args, &block)
+end
+~~~
+
+Bueno, está bueno, agrega un callback. Así antes de salvar, tenémos que
+correr las validaciones y si pasan, entonces lo guardo.
+Esto funciona, obviamente porque ActiveRecord *"sabe"* que debe llamar a
+este callback. O sea, que si yo hago un nuevo active model y quiero
+agregarle validaciones, tengo que acordarme de llamarlas.
+
+~~~ ruby
+# File activerecord/lib/active_record/callbacks.rb, line 267
+def create #:nodoc:
+  run_callbacks(:create) { super }
+end
+~~~
+
+Eso no está bueno, pero suele no haber forma de evitarlo. Pero ahora a
+mi se me ocurre que podríamos usar module prepend. Cómo?
+
+~~~ ruby
+module Validations
+
+  def create
+    super if valid?
+  end
+
+end
+
+class MyModel
+  prepend Validations
+
+  def create
+    # un metodo que no se 'acuerda' de llamar a super
+  end
+
+end
+~~~
+
+Y voila, tenemos validaciones.
+
+Obviamente, esto no hace que nuestro codigo sea totalmente desacoplado
+(no solo porque eso es imposible), pero de pronto ha ganado en:
+
+- Expresivo
+- Claro
+- Conciso
+- Autodocumentado (*)
+
+(*) no estoy muy seguro de que esto sea tan así, ya que puede ser
+bastante inentendible dónde están las validaciones para quien lea el
+código.
