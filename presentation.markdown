@@ -167,3 +167,9 @@ Obviamente, esto no hace que nuestro codigo sea totalmente desacoplado
 (*) no estoy muy seguro de que esto sea tan así, ya que puede ser
 bastante inentendible dónde están las validaciones para quien lea el
 código.
+
+## Las otras pequeñas cosas ##
+
+![busqueda](http://img703.imageshack.us/img703/9692/selection010k.png "Basta de __FILE__")
+
+Bueno, por se puede escribir `__dir__` para eso...
