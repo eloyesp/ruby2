@@ -1,5 +1,7 @@
 # Ruby 2.0 #
 
+> Un intento de presentación con mucho código.
+
 ¿Ruby recién está en la versión 2?
 
 Si.
@@ -28,7 +30,7 @@ cierro paréntesis y vuelvo a...
 
 # ¿Qué hay de nuevo? #
 
-## Keyword arguments ##
+# Keyword arguments #
 
 Bueno, la idea es que el típico hash de opciones que uno mira cuando
 escribe el método y todo de una forma clara.
@@ -64,7 +66,7 @@ end
 Bueno... ¿es feo no? pero es rails y el uso es más bien simple. Es un
 before filter.
 
-### Cómo queda en ruby 2.0? ###
+# Cómo queda en ruby 2.0? #
 
 ~~~ ruby
 def _insert_callbacks(callbacks, only: [], except: [], block)
@@ -78,6 +80,8 @@ def _insert_callbacks(callbacks, only: [], except: [], block)
 
 Bueno... ese es un pequeño refactory, se puede hacer mejor... pero eso
 nos va a servir por ahora.
+
+# ¿Y está bueno? #
 
 La ventaja es que ahora nos sacamos de encima una linea (que ahora está
 comentada) y ganamos además, un error si escribimos mal el before
@@ -98,11 +102,13 @@ O sea, que es más:
 - Conciso
 - Autodocumentado
 
-## Module prepend ##
+# Module prepend #
 
 Bueno, este es complicado de ver al principio, pero supongamos que
 queremos hacer un módulo para agregar validaciones a un modelo. Mmm...
 esperá, eso ya lo hace rails... como lo hace?
+
+# Validaciones en rails #
 
 ~~~ ruby
 # File activemodel/lib/active_model/validations.rb, line 132
@@ -119,6 +125,8 @@ def validate(*args, &block)
 end
 ~~~
 
+# Pero hay un callback #
+
 Bueno, está bueno, agrega un callback. Así antes de salvar, tenémos que
 correr las validaciones y si pasan, entonces lo guardo.
 Esto funciona, obviamente porque ActiveRecord *"sabe"* que debe llamar a
@@ -131,6 +139,8 @@ def create #:nodoc:
   run_callbacks(:create) { super }
 end
 ~~~
+
+# En ruby 2 #
 
 Eso no está bueno, pero suele no haber forma de evitarlo. Pero ahora a
 mi se me ocurre que podríamos usar module prepend. Cómo?
@@ -156,6 +166,8 @@ end
 
 Y voila, tenemos validaciones.
 
+# Y ganamos #
+
 Obviamente, esto no hace que nuestro codigo sea totalmente desacoplado
 (no solo porque eso es imposible), pero de pronto ha ganado en:
 
@@ -168,9 +180,13 @@ Obviamente, esto no hace que nuestro codigo sea totalmente desacoplado
 bastante inentendible dónde están las validaciones para quien lea el
 código.
 
-## Las otras pequeñas cosas ##
+# Las otras pequeñas cosas #
 
-## __dir__ ##
+- `__dir__`
+- `%i`
+- `to_h`
+
+# `__dir__` #
 
 ![busqueda](http://img703.imageshack.us/img703/9692/selection010k.png "Basta de __FILE__")
 
@@ -184,7 +200,7 @@ $: << File.expand_path(File.join(__dir__, '..', 'lib'))
 > que el primero es para bajar desde `hackerup/test/helper.rb` a
 > `hackerup/test`
 
-### %i ###
+# %i #
 
 Completando el set de %q, %r... %i
 
@@ -192,7 +208,10 @@ Completando el set de %q, %r... %i
 %i[ uno dos tres ] #=> [:uno, :dos, :tres]
 ~~~
 
-### to_h ###
+A mi en realidad, esto me resultan muy comodos, pero son algo confusos a 
+la hora de empezar a usar ruby.
+
+# to_h #
 
 Para completar to_a, to_s, to_sym... faltaba alguien. No anda re-bien,
 pero está ahí y almenos plantea un standar.
@@ -206,4 +225,4 @@ carlos = Persona.new('carlos') #=> #<struct Persona nombre="carlos">
 carlos.to_h                    #=> {:nombre=>"carlos"}
 ~~~
 
-
+# Muchas Gracias #
