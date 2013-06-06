@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; }
+code > span.dt { color: #902000; }
+code > span.dv { color: #40a070; }
+code > span.bn { color: #40a070; }
+code > span.fl { color: #40a070; }
+code > span.ch { color: #4070a0; }
+code > span.st { color: #4070a0; }
+code > span.co { color: #60a0b0; font-style: italic; }
+code > span.ot { color: #007020; }
+code > span.al { color: #ff0000; font-weight: bold; }
+code > span.fu { color: #06287e; }
+code > span.er { color: #ff0000; font-weight: bold; }
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js.gz"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="section slide level1" id="ruby-2.0">
+<h1 id="ruby-2.0">Ruby 2.0</h1>
+<blockquote>
+<p>Un intento de presentación con mucho código.</p>
+</blockquote>
+<p>¿Ruby recién está en la versión 2?</p>
+<p>Si.</p>
+</div>
+<div class="section slide level1" id="qué-tiene-de-nuevo">
+<h1 id="qué-tiene-de-nuevo">¿Qué tiene de nuevo?</h1>
+<p>Bueno, hay distintas posturas, los que miran primero cuales son las cosas incompatibles y los que miran la nueva funcionalidad.</p>
+<p>Yo, miro la nueva funcionalidad.</p>
+<p>Estoy ansioso de hacer codigo <strong>incompatible</strong> con 1.9.</p>
+</div>
+<div class="section slide level1" id="cómo-qué">
+<h1 id="cómo-qué">¿Cómo qué?</h1>
+<p>Bueno, acá hago una pausa y intento explicar que tiene de bueno ruby.</p>
+<p>Ruby es:</p>
+<ul>
+<li>Expresivo</li>
+<li>Claro</li>
+<li>Conciso</li>
+<li>Autodocumentado</li>
+</ul>
+<p>cierro paréntesis y vuelvo a...</p>
+</div>
+<div class="section slide level1" id="qué-hay-de-nuevo">
+<h1 id="qué-hay-de-nuevo">¿Qué hay de nuevo?</h1>
+</div>
+<div class="section slide level1" id="keyword-arguments">
+<h1 id="keyword-arguments">Keyword arguments</h1>
+<p>Bueno, la idea es que el típico hash de opciones que uno mira cuando escribe el método y todo de una forma clara.</p>
+<p>Veamos como funcionaba esto en ruby 1.9:</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="co"># File actionpack/lib/abstract_controller/callbacks.rb, line 69</span>
+
+<span class="kw">def</span> _insert_callbacks(callbacks, block)
+  options = callbacks.last.is_a?(<span class="dt">Hash</span>) ? callbacks.pop : {}
+  _normalize_callback_options(options)
+  callbacks.push(block) <span class="kw">if</span> block
+  callbacks.each <span class="kw">do</span> |callback|
+    <span class="kw">yield</span> callback, options
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+<span class="co"># File actionpack/lib/abstract_controller/callbacks.rb, line 33</span>
+
+<span class="kw">def</span> _normalize_callback_options(options)
+  <span class="kw">if</span> only = options[<span class="st">:only</span>]
+    only = <span class="dt">Array</span>(only).map {|o| <span class="st">&quot;action_name == &#39;</span><span class="ot">#{</span>o<span class="ot">}</span><span class="st">&#39;&quot;</span>}.join(<span class="st">&quot; || &quot;</span>)
+    options[<span class="st">:per_key</span>] = {<span class="st">:if</span> =&gt; only}
+  <span class="kw">end</span>
+  <span class="kw">if</span> except = options[<span class="st">:except</span>]
+    except = <span class="dt">Array</span>(except).map {|e| <span class="st">&quot;action_name == &#39;</span><span class="ot">#{</span>e<span class="ot">}</span><span class="st">&#39;&quot;</span>}.join(<span class="st">&quot; || &quot;</span>)
+    options[<span class="st">:per_key</span>] = {<span class="st">:unless</span> =&gt; except}
+  <span class="kw">end</span>
+<span class="kw">end</span></code></pre>
+<p>Bueno... ¿es feo no? pero es rails y el uso es más bien simple. Es un before filter.</p>
+</div>
+<div class="section slide level1" id="cómo-queda-en-ruby-2.0">
+<h1 id="cómo-queda-en-ruby-2.0">Cómo queda en ruby 2.0?</h1>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="kw">def</span> _insert_callbacks(callbacks, only: [], except: [], block)
+  <span class="co"># options = callbacks.last.is_a?(Hash) ? callbacks.pop : {}</span>
+  _normalize_callback_options(only: only, except: except)
+  callbacks.push(block) <span class="kw">if</span> block
+  callbacks.each <span class="kw">do</span> |callback|
+    <span class="kw">yield</span> callback, options
+  <span class="kw">end</span></code></pre>
+<p>Bueno... ese es un pequeño refactory, se puede hacer mejor... pero eso nos va a servir por ahora.</p>
+</div>
+<div class="section slide level1" id="y-está-bueno">
+<h1 id="y-está-bueno">¿Y está bueno?</h1>
+<p>La ventaja es que ahora nos sacamos de encima una linea (que ahora está comentada) y ganamos además, un error si escribimos mal el before filter.</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">before_filter <span class="st">:some_method</span>, onli: [<span class="st">:create</span>]
+<span class="co"># =&gt; ArgumentError!</span></code></pre>
+<p>Y no solo eso, ahora el método se entiende más y las opciones ahora casi no es necesario documentarlas.</p>
+<p>O sea, que es más:</p>
+<ul class="incremental">
+<li>Expresivo</li>
+<li>Claro</li>
+<li>Conciso</li>
+<li>Autodocumentado</li>
+</ul>
+</div>
+<div class="section slide level1" id="module-prepend">
+<h1 id="module-prepend">Module prepend</h1>
+<p>Bueno, este es complicado de ver al principio, pero supongamos que queremos hacer un módulo para agregar validaciones a un modelo. Mmm... esperá, eso ya lo hace rails... como lo hace?</p>
+</div>
+<div class="section slide level1" id="validaciones-en-rails">
+<h1 id="validaciones-en-rails">Validaciones en rails</h1>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="co"># File activemodel/lib/active_model/validations.rb, line 132</span>
+
+<span class="kw">def</span> validate(*args, &amp;block)
+  options = args.extract_options!
+  <span class="kw">if</span> options.key?(<span class="st">:on</span>)
+    options = options.dup
+    options[<span class="st">:if</span>] = <span class="dt">Array</span>.wrap(options[<span class="st">:if</span>])
+    options[<span class="st">:if</span>].unshift(<span class="st">&quot;validation_context == :</span><span class="ot">#{</span>options[<span class="st">:on</span>]<span class="ot">}</span><span class="st">&quot;</span>)
+  <span class="kw">end</span>
+  args &lt;&lt; options
+  set_callback(<span class="st">:validate</span>, *args, &amp;block)
+<span class="kw">end</span></code></pre>
+</div>
+<div class="section slide level1" id="pero-hay-un-callback">
+<h1 id="pero-hay-un-callback">Pero hay un callback</h1>
+<p>Bueno, está bueno, agrega un callback. Así antes de salvar, tenémos que correr las validaciones y si pasan, entonces lo guardo. Esto funciona, obviamente porque ActiveRecord <em>&quot;sabe&quot;</em> que debe llamar a este callback. O sea, que si yo hago un nuevo active model y quiero agregarle validaciones, tengo que acordarme de llamarlas.</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="co"># File activerecord/lib/active_record/callbacks.rb, line 267</span>
+<span class="kw">def</span> create <span class="co">#:nodoc:</span>
+  run_callbacks(<span class="st">:create</span>) { <span class="dv">super</span> }
+<span class="kw">end</span></code></pre>
+</div>
+<div class="section slide level1" id="en-ruby-2">
+<h1 id="en-ruby-2">En ruby 2</h1>
+<p>Eso no está bueno, pero suele no haber forma de evitarlo. Pero ahora a mi se me ocurre que podríamos usar module prepend. Cómo?</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="kw">module</span> <span class="dt">Validations</span>
+
+  <span class="kw">def</span> create
+    <span class="dv">super</span> <span class="kw">if</span> valid?
+  <span class="kw">end</span>
+
+<span class="kw">end</span>
+
+<span class="kw">class</span> <span class="dt">MyModel</span>
+  prepend <span class="dt">Validations</span>
+
+  <span class="kw">def</span> create
+    <span class="co"># un metodo que no se &#39;acuerda&#39; de llamar a super</span>
+  <span class="kw">end</span>
+
+<span class="kw">end</span></code></pre>
+<p>Y voila, tenemos validaciones.</p>
+</div>
+<div class="section slide level1" id="y-ganamos">
+<h1 id="y-ganamos">Y ganamos</h1>
+<p>Obviamente, esto no hace que nuestro codigo sea totalmente desacoplado (no solo porque eso es imposible), pero de pronto ha ganado en:</p>
+<ul class="incremental">
+<li>Expresivo</li>
+<li>Claro</li>
+<li>Conciso</li>
+<li>Autodocumentado (*)</li>
+</ul>
+<p>(*) no estoy muy seguro de que esto sea tan así, ya que puede ser bastante inentendible dónde están las validaciones para quien lea el código.</p>
+</div>
+<div class="section slide level1" id="las-otras-pequeñas-cosas">
+<h1 id="las-otras-pequeñas-cosas">Las otras pequeñas cosas</h1>
+<ul>
+<li><code>__dir__</code></li>
+<li><code>%i</code></li>
+<li><code>to_h</code></li>
+</ul>
+</div>
+<div class="section slide level1" id="dir__">
+<h1 id="dir__"><code>__dir__</code></h1>
+<div class="figure">
+<img src="http://img703.imageshack.us/img703/9692/selection010k.png" title="Basta de __FILE__" alt="busqueda" /><p class="caption">busqueda</p>
+</div>
+<p>Bueno, por se puede escribir <code>__dir__</code> para eso...</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">$:</span> &lt;&lt; <span class="dt">File</span>.expand_path(<span class="dt">File</span>.join(__dir__, <span class="st">&#39;..&#39;</span>, <span class="st">&#39;lib&#39;</span>))</code></pre>
+<blockquote>
+<p>Por si no se nota, hay un '..' menos, que siempre confunde mucho, ya que el primero es para bajar desde <code>hackerup/test/helper.rb</code> a <code>hackerup/test</code></p>
+</blockquote>
+</div>
+<div class="section slide level1" id="i">
+<h1 id="i">%i</h1>
+<p>Completando el set de %q, %r... %i</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="ot">%</span>i<span class="ot">[</span><span class="st"> uno dos tres </span><span class="ot">]</span> <span class="co">#=&gt; [:uno, :dos, :tres]</span></code></pre>
+<p>A mi en realidad, esto me resultan muy comodos, pero son algo confusos a la hora de empezar a usar ruby.</p>
+</div>
+<div class="section slide level1" id="to_h">
+<h1 id="to_h">to_h</h1>
+<p>Para completar to_a, to_s, to_sym... faltaba alguien. No anda re-bien, pero está ahí y almenos plantea un standar.</p>
+<p>A mi me permitió conocer a los Struct, que después me cayeron re-bien.</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">Persona</span> = <span class="dt">Struct</span>.new(<span class="st">:nombre</span>)  <span class="co">#=&gt; Persona</span>
+carlos = <span class="dt">Persona</span>.new(<span class="st">&#39;carlos&#39;</span>) <span class="co">#=&gt; #&lt;struct Persona nombre=&quot;carlos&quot;&gt;</span>
+carlos.to_h                    <span class="co">#=&gt; {:nombre=&gt;&quot;carlos&quot;}</span></code></pre>
+</div>
+<div class="section slide level1" id="muchas-gracias">
+<h1 id="muchas-gracias">Muchas Gracias</h1>
+</div>
+</body>
+</html>
