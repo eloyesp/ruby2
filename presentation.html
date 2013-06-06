@@ -108,7 +108,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <span class="co"># =&gt; ArgumentError!</span></code></pre>
 <p>Y no solo eso, ahora el método se entiende más y las opciones ahora casi no es necesario documentarlas.</p>
 <p>O sea, que es más:</p>
-<ul class="incremental">
+<ul>
 <li>Expresivo</li>
 <li>Claro</li>
 <li>Conciso</li>
@@ -166,7 +166,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div class="section slide level1" id="y-ganamos">
 <h1 id="y-ganamos">Y ganamos</h1>
 <p>Obviamente, esto no hace que nuestro codigo sea totalmente desacoplado (no solo porque eso es imposible), pero de pronto ha ganado en:</p>
-<ul class="incremental">
+<ul>
 <li>Expresivo</li>
 <li>Claro</li>
 <li>Conciso</li>
@@ -206,6 +206,37 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="dt">Persona</span> = <span class="dt">Struct</span>.new(<span class="st">:nombre</span>)  <span class="co">#=&gt; Persona</span>
 carlos = <span class="dt">Persona</span>.new(<span class="st">&#39;carlos&#39;</span>) <span class="co">#=&gt; #&lt;struct Persona nombre=&quot;carlos&quot;&gt;</span>
 carlos.to_h                    <span class="co">#=&gt; {:nombre=&gt;&quot;carlos&quot;}</span></code></pre>
+</div>
+<div class="section slide level1" id="refinements">
+<h1 id="refinements">Refinements</h1>
+<p>Bueno, active support está bueno, lo que hace es agregar un par de cosas muy útiles en las core classes. O sea, hace monkey patching.</p>
+<p>El problema es que el monkey patching puede ser inesperado, así que no se pone extremadamente violento.</p>
+<pre class="sourceCode ruby"><code class="sourceCode ruby">require <span class="st">&#39;active_support&#39;</span>
+<span class="st">&quot;&quot;</span>.empty?     <span class="co">#=&gt; true</span>
+<span class="st">&quot;  &quot;</span>.empty?   <span class="co">#=&gt; false</span>
+<span class="st">&quot;&quot;</span>.nil?       <span class="co">#=&gt; false</span></code></pre>
+</div>
+<div class="section slide level1" id="esta-claro-que-es-un-poquito-cagón-no">
+<h1 id="esta-claro-que-es-un-poquito-cagón-no">¿Esta claro que es un poquito cagón no?</h1>
+<p>Pero tiene un sentido, si se hace de manera muy violenta te puede morder cuando no lo esperás. La solución a esto es hacer el monkey patching controlable.</p>
+</div>
+<div class="section slide level1" id="y-podemos-usar-refinements">
+<h1 id="y-podemos-usar-refinements">y podemos usar refinements</h1>
+<pre class="sourceCode ruby"><code class="sourceCode ruby"><span class="kw">module</span> <span class="dt">ExtremeMonkeyPatching</span>
+  refine <span class="dt">String</span> <span class="kw">do</span>
+    <span class="kw">def</span> nil?
+      <span class="dv">self</span> =~ <span class="ot">/^\s*$/</span>
+    <span class="kw">end</span>
+  <span class="kw">end</span>
+<span class="kw">end</span>
+
+using <span class="dt">ExtremeMonkeyPatching</span>
+
+<span class="st">&quot;  &quot;</span>.nil? <span class="co">#=&gt; true</span>
+
+<span class="co"># some other file</span>
+
+<span class="st">&quot;  &quot;</span>.nil? <span class="co">#=&gt; false</span></code></pre>
 </div>
 <div class="section slide level1" id="muchas-gracias">
 <h1 id="muchas-gracias">Muchas Gracias</h1>

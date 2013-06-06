@@ -225,4 +225,45 @@ carlos = Persona.new('carlos') #=> #<struct Persona nombre="carlos">
 carlos.to_h                    #=> {:nombre=>"carlos"}
 ~~~
 
+# Refinements #
+
+Bueno, active support está bueno, lo que hace es agregar un par de cosas
+muy útiles en las core classes. O sea, hace monkey patching.
+
+El problema es que el monkey patching puede ser inesperado, así que no
+se pone extremadamente violento.
+
+~~~ ruby
+require 'active_support'
+"".empty?     #=> true
+"  ".empty?   #=> false
+"".nil?       #=> false
+~~~
+
+# ¿Esta claro que es un poquito cagón no? #
+
+Pero tiene un sentido, si se hace de manera muy violenta te puede morder
+cuando no lo esperás. La solución a esto es hacer el monkey patching
+controlable.
+
+# y podemos usar refinements #
+
+~~~ ruby
+module ExtremeMonkeyPatching
+  refine String do
+    def nil?
+      self =~ /^\s*$/
+    end
+  end
+end
+
+using ExtremeMonkeyPatching
+
+"  ".nil? #=> true
+
+# some other file
+
+"  ".nil? #=> false
+~~~
+
 # Muchas Gracias #
